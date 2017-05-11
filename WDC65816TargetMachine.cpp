@@ -12,6 +12,7 @@
 
 
 #include <sys/time.h>
+#include <cstdio>
 
 #include "WDC65816TargetMachine.h"
 #include "WDC65816.h"

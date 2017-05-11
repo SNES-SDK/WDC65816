@@ -82,9 +82,8 @@ void WDC65816AsmPrinter::EmitStartOfAsmFile(Module &module)
 {
     WDC65816TargetStreamer &streamer = getTargetStreamer();
     
-    streamer.EmitCaseDirective();
-    streamer.EmitKeepDirective(module.getModuleIdentifier());
-    streamer.EmitSegStartDirective(module.getModuleIdentifier());
+    streamer.EmitP816Directive();
+    streamer.EmitCodeDirective();
 }
 
 
@@ -92,9 +91,7 @@ void WDC65816AsmPrinter::EmitEndOfAsmFile(Module &module)
 {
     WDC65816TargetStreamer &streamer = getTargetStreamer();
     
-    streamer.EmitSegEndDirective();
 }
-
 
 void WDC65816AsmPrinter::printOperand(const MachineInstr *MI, int opNum,
                                       raw_ostream &O) {

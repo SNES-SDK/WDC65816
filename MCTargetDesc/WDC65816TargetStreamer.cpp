@@ -23,7 +23,6 @@ WDC65816TargetAsmStreamer::~WDC65816TargetAsmStreamer()
 
 }
 
-
 StringRef &WDC65816TargetAsmStreamer::trimFilename(StringRef &filename)
 {
     size_t lastSlash = filename.find_last_of('/');
@@ -39,65 +38,22 @@ StringRef &WDC65816TargetAsmStreamer::trimFilename(StringRef &filename)
     return filename;
 }
 
-
-void WDC65816TargetAsmStreamer::EmitCaseDirective(void)
+void WDC65816TargetAsmStreamer::EmitCodeDirective()
 {
     OS << indent;
-    OS << "case on";
-    OS << '\n';
+    OS << ".code\n";
 }
 
-
-void WDC65816TargetAsmStreamer::EmitKeepDirective(StringRef filename)
+void WDC65816TargetAsmStreamer::EmitP816Directive()
 {
     OS << indent;
-    OS << "keep ";
-    OS << trimFilename(filename);
-    OS << '\n';
+    OS << ".p816\n";
 }
-
-
-void WDC65816TargetAsmStreamer::EmitSegStartDirective(StringRef filename)
-{
-    StringRef trimmedName = trimFilename(filename);
-    int col = 1;
-    
-    OS << "~";
-    col++;
-    
-    OS << trimFilename(filename);
-    col += trimmedName.size();
-    
-    while (col < indentlen) {
-        OS << " ";
-        col++;
-    }
-    OS << " start";
-    OS << '\n';
-}
-
-
-void WDC65816TargetAsmStreamer::EmitSegEndDirective(void)
-{
-    OS << indent;
-    OS << "end";
-    OS << '\n';
-}
-
 
 void WDC65816TargetAsmStreamer::EmitFunctionEntryLabel(StringRef function)
 {
-    int col = 1;
-    
     OS << function;
-    col += function.size();
-    
-    while (col < indentlen) {
-        OS << " ";
-        col++;
-    }
-    OS << " entry";
-    OS << '\n';
+    OS << ":\n";
 }
 
 

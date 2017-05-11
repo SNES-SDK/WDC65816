@@ -20,10 +20,8 @@ namespace llvm {
         virtual void anchor();
         
     public:
-        virtual void EmitCaseDirective(void) = 0;
-        virtual void EmitKeepDirective(StringRef filename) = 0;
-        virtual void EmitSegStartDirective(StringRef filename) = 0;
-        virtual void EmitSegEndDirective(void) = 0;
+        virtual void EmitCodeDirective(void) = 0;
+        virtual void EmitP816Directive(void) = 0;
         
         virtual void EmitFunctionEntryLabel(StringRef function) = 0;
         virtual void EmitInstruction(StringRef instruction) = 0;
@@ -37,13 +35,11 @@ namespace llvm {
         StringRef &trimFilename(StringRef &filename);
         
     public:
-        WDC65816TargetAsmStreamer(formatted_raw_ostream &OS) : OS(OS), indent("           "), indentlen(11) {}
+        WDC65816TargetAsmStreamer(formatted_raw_ostream &OS) : OS(OS), indent("    "), indentlen(4) {}
         virtual ~WDC65816TargetAsmStreamer();
         
-        virtual void EmitCaseDirective(void);
-        virtual void EmitKeepDirective(StringRef filename);
-        virtual void EmitSegStartDirective(StringRef filename);
-        virtual void EmitSegEndDirective(void);
+        virtual void EmitCodeDirective(void);
+        virtual void EmitP816Directive(void);
         
         virtual void EmitFunctionEntryLabel(StringRef function);
         virtual void EmitInstruction(StringRef instruction);
