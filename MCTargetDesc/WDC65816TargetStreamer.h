@@ -29,13 +29,11 @@ namespace llvm {
     
     class WDC65816TargetAsmStreamer : public WDC65816TargetStreamer {
         formatted_raw_ostream &OS;
-        StringRef indent;
-        int indentlen;
         
         StringRef &trimFilename(StringRef &filename);
         
     public:
-        WDC65816TargetAsmStreamer(formatted_raw_ostream &OS) : OS(OS), indent("    "), indentlen(4) {}
+        WDC65816TargetAsmStreamer(formatted_raw_ostream &OS) : OS(OS) {}
         virtual ~WDC65816TargetAsmStreamer();
         
         virtual void EmitCodeDirective(void);

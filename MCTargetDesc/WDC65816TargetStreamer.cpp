@@ -40,14 +40,12 @@ StringRef &WDC65816TargetAsmStreamer::trimFilename(StringRef &filename)
 
 void WDC65816TargetAsmStreamer::EmitCodeDirective()
 {
-    OS << indent;
-    OS << ".code\n";
+    OS << "\t.code\n";
 }
 
 void WDC65816TargetAsmStreamer::EmitP816Directive()
 {
-    OS << indent;
-    OS << ".p816\n";
+    OS << "\t.p816\n";
 }
 
 void WDC65816TargetAsmStreamer::EmitFunctionEntryLabel(StringRef function)
@@ -60,7 +58,7 @@ void WDC65816TargetAsmStreamer::EmitFunctionEntryLabel(StringRef function)
 void WDC65816TargetAsmStreamer::EmitInstruction(StringRef instruction)
 {
     instruction = instruction.ltrim();
-    OS << indent;
+    OS << '\t';
     OS << instruction;
     OS << '\n';
 }

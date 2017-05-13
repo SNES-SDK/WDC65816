@@ -30,26 +30,32 @@ WDC65816MCAsmInfo::WDC65816MCAsmInfo(StringRef TT) {
     // Diable the ".size" parameter
     HasDotTypeDotSizeDirective = false;
     
-    // No.
-    GlobalDirective = ".global ";
+    GlobalDirective = "\t.global\t";
+
+    Data8bitsDirective = "\t.byte\t";
+    Data16bitsDirective = "\t.word\t";
+    Data32bitsDirective = "\t.dword\t";
+    Data64bitsDirective = 0;
+    ZeroDirective = "\t.res\t";
+    // TODO need to special case this, ca65 doesn't support C escape chars
+    AsciiDirective = "\t.asciiz\t";
+
+    CommentString = ";";
+
+    // ca65 handles this
+    //TextAlignFillValue = 0xEA;
+
+    //UseLogicalShr = true;
+
+    //PrivateGlobalPrefix = ".L";
+
+    //HasLEB128 = true;
+    //SupportsDebugInformation = true;
     
-#if 0 // WDC_TODO - Do I need any of this?
-    Data16bitsDirective = "\t.half\t";
-    Data32bitsDirective = "\t.word\t";
-    // .xword is only supported by V9.
-    Data64bitsDirective = (isV9) ? "\t.xword\t" : 0;
-    ZeroDirective = "\t.skip\t";
-    CommentString = "!";
-    HasLEB128 = true;
-    SupportsDebugInformation = true;
+    //ExceptionsType = ExceptionHandling::DwarfCFI;
     
-    ExceptionsType = ExceptionHandling::DwarfCFI;
-    
-    SunStyleELFSectionSwitchSyntax = true;
-    UsesELFSectionDirectiveForBSS = true;
-    
-    PrivateGlobalPrefix = ".L";
-#endif
+    //SunStyleELFSectionSwitchSyntax = true;
+    //UsesELFSectionDirectiveForBSS = true;
 }
 
 
