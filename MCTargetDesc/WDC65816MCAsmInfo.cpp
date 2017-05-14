@@ -39,6 +39,7 @@ WDC65816MCAsmInfo::WDC65816MCAsmInfo(StringRef TT) {
     ZeroDirective = "\t.res\t";
     // TODO need to special case this, ca65 doesn't support C escape chars
     AsciiDirective = "\t.asciiz\t";
+    AscizDirective = "\t.asciiz\t";
 
     CommentString = ";";
 

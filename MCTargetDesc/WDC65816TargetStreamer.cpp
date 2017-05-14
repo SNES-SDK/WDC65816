@@ -43,6 +43,11 @@ void WDC65816TargetAsmStreamer::EmitCodeDirective()
     OS << "\t.code\n";
 }
 
+void WDC65816TargetAsmStreamer::EmitAutoimportDirective()
+{
+    OS << "\t.autoimport\t+\n";
+}
+
 void WDC65816TargetAsmStreamer::EmitP816Directive()
 {
     OS << "\t.p816\n";

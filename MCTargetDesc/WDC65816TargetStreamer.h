@@ -20,6 +20,7 @@ namespace llvm {
         virtual void anchor();
         
     public:
+        virtual void EmitAutoimportDirective(void) = 0;
         virtual void EmitCodeDirective(void) = 0;
         virtual void EmitP816Directive(void) = 0;
         
@@ -36,6 +37,7 @@ namespace llvm {
         WDC65816TargetAsmStreamer(formatted_raw_ostream &OS) : OS(OS) {}
         virtual ~WDC65816TargetAsmStreamer();
         
+        virtual void EmitAutoimportDirective(void);
         virtual void EmitCodeDirective(void);
         virtual void EmitP816Directive(void);
         

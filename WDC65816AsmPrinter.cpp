@@ -83,6 +83,7 @@ void WDC65816AsmPrinter::EmitStartOfAsmFile(Module &module)
     WDC65816TargetStreamer &streamer = getTargetStreamer();
     
     streamer.EmitP816Directive();
+    streamer.EmitAutoimportDirective();
     streamer.EmitCodeDirective();
 }
 
