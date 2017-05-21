@@ -32,7 +32,8 @@ bool WDC65816FrameLowering::hasFP(const MachineFunction &MF) const {
 }
 
 
-void WDC65816FrameLowering::emitPrologue(MachineFunction &MF) const {
+void WDC65816FrameLowering::emitPrologue(MachineFunction &MF,
+                                         MachineBasicBlock &MBB) const {
     WDC_LOG("WDC_TODO - Unimplemented method called");
 }
 
