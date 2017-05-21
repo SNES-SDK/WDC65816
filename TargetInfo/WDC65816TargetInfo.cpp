@@ -7,15 +7,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "WDC65816.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/TargetRegistry.h"
-using namespace llvm;
 
-Target llvm::TheWDC65816Target;
+namespace llvm {
+Target &getTheWDC65816Target() {
+  static Target TheWDC65816Target;
+  return TheWDC65816Target;
+}
+}
 
 extern "C" void LLVMInitializeWDC65816TargetInfo() {
-    WDC_LOG("Registering the target");
-    RegisterTarget<Triple::wdc65816, /*HasJIT=*/ false>
-    X(TheWDC65816Target, "wdc65816", "WDC65816");
+  llvm::RegisterTarget<llvm::Triple::wdc65816> X(llvm::getTheWDC65816Target(),
+                                                 "wdc65816",
+                                                 "WDC 65816");
 }

@@ -18,16 +18,15 @@ using namespace llvm;
 
 void WDC65816MCAsmInfo::anchor() { }
 
-WDC65816MCAsmInfo::WDC65816MCAsmInfo(StringRef TT) {
+WDC65816MCAsmInfo::WDC65816MCAsmInfo(const Triple &TT) {
     IsLittleEndian = true;
-    Triple TheTriple(TT);
     
-    PointerSize = CalleeSaveStackSlotSize = 4;
+    /*PointerSize =*/ CalleeSaveStackSlotSize = 4;
     
     // Disable the ".file <filename>" parameter
     HasSingleParameterDotFile = false;
     
-    // Diable the ".size" parameter
+    // Disable the ".size" parameter
     HasDotTypeDotSizeDirective = false;
     
     GlobalDirective = "\t.global\t";
@@ -35,7 +34,7 @@ WDC65816MCAsmInfo::WDC65816MCAsmInfo(StringRef TT) {
     Data8bitsDirective = "\t.byte\t";
     Data16bitsDirective = "\t.word\t";
     Data32bitsDirective = "\t.dword\t";
-    Data64bitsDirective = 0;
+    Data64bitsDirective = nullptr;
     ZeroDirective = "\t.res\t";
     // TODO need to special case this, ca65 doesn't support C escape chars
     AsciiDirective = "\t.asciiz\t";
@@ -58,5 +57,3 @@ WDC65816MCAsmInfo::WDC65816MCAsmInfo(StringRef TT) {
     //SunStyleELFSectionSwitchSyntax = true;
     //UsesELFSectionDirectiveForBSS = true;
 }
-
-

@@ -20,7 +20,6 @@ void WDC65816TargetStreamer::anchor() {}
 
 WDC65816TargetAsmStreamer::~WDC65816TargetAsmStreamer()
 {
-
 }
 
 StringRef &WDC65816TargetAsmStreamer::trimFilename(StringRef &filename)

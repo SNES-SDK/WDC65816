@@ -72,14 +72,14 @@ void WDC65816InstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
                                           const TargetRegisterInfo *TRI) const {
     DebugLoc DL;
     if (MI != MBB.end()) DL = MI->getDebugLoc();
-    MachineFunction &MF = *MBB.getParent();
-    MachineFrameInfo &MFI = *MF.getFrameInfo();
+    MachineFunction *MF = MBB.getParent();
+    const MachineFrameInfo &MFI = MF->getFrameInfo();
     
     MachineMemOperand *MMO =
-    MF.getMachineMemOperand(MachinePointerInfo::getFixedStack(FrameIdx),
-                            MachineMemOperand::MOStore,
-                            MFI.getObjectSize(FrameIdx),
-                            MFI.getObjectAlignment(FrameIdx));
+    MF->getMachineMemOperand(MachinePointerInfo::getFixedStack(*MF, FrameIdx),
+                             MachineMemOperand::MOStore,
+                             MFI.getObjectSize(FrameIdx),
+                             MFI.getObjectAlignment(FrameIdx));
     
     if (RC == &WDC::AccRegsRegClass)
         BuildMI(MBB, MI, DL, get(WDC::STAabsl))
@@ -95,11 +95,11 @@ void WDC65816InstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
                                            const TargetRegisterInfo *TRI) const{
     DebugLoc DL;
     if (MI != MBB.end()) DL = MI->getDebugLoc();
-    MachineFunction &MF = *MBB.getParent();
-    MachineFrameInfo &MFI = *MF.getFrameInfo();
+    MachineFunction *MF = MBB.getParent();
+    const MachineFrameInfo &MFI = MF->getFrameInfo();
     
     MachineMemOperand *MMO =
-    MF.getMachineMemOperand(MachinePointerInfo::getFixedStack(FrameIdx),
+    MF->getMachineMemOperand(MachinePointerInfo::getFixedStack(*MF, FrameIdx),
                             MachineMemOperand::MOLoad,
                             MFI.getObjectSize(FrameIdx),
                             MFI.getObjectAlignment(FrameIdx));

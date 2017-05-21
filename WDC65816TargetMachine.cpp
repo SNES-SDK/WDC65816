@@ -1,4 +1,4 @@
-//===- WDC65816TargetMachine.cpp - Define TargetMachine for WDC65816 ------===//
+//===--- WDC65816TargetMachine.cpp - Define TargetMachine for WDC65816 ----===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,92 +7,103 @@
 //
 //===----------------------------------------------------------------------===//
 //
+// This file defines the WDC65816 specific subclass of TargetMachine.
 //
 //===----------------------------------------------------------------------===//
 
-
-#include <sys/time.h>
-#include <cstdio>
-
 #include "WDC65816TargetMachine.h"
-#include "WDC65816.h"
+
 #include "llvm/CodeGen/Passes.h"
-#include "llvm/PassManager.h"
+#include "llvm/CodeGen/TargetPassConfig.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Support/TargetRegistry.h"
 
-using namespace llvm;
+//#include "AVRTargetObjectFile.h"
+//#include "AVR.h"
+#include "MCTargetDesc/WDC65816MCTargetDesc.h"
 
-extern "C" void LLVMInitializeWDC65816Target() {
-    // Register the target.
-    RegisterTargetMachine<WDC65816TargetMachine> X(TheWDC65816Target);
-    WDC_LOG("Registered the target machine");
-}
+namespace llvm {
 
-/// WDC65816TargetMachine ctor
-///
-WDC65816TargetMachine::WDC65816TargetMachine(const Target &T, StringRef TT,
-                                       StringRef CPU, StringRef FS,
-                                       const TargetOptions &Options,
-                                       Reloc::Model RM, CodeModel::Model CM,
-                                       CodeGenOpt::Level OL)
-: LLVMTargetMachine(T, TT, CPU, FS, Options, RM, CM, OL),
-Subtarget(TT, CPU, FS),
-DL(Subtarget.getDataLayout()),
-InstrInfo(Subtarget),
-TLInfo(*this), TSInfo(*this),
-FrameLowering(Subtarget) {
-    initAsmInfo();
-}
+    static const char *WDC65816DataLayout = "e-p:32:8:8-i8:8:8-i16:8:8-i32:8:8-n8:16";
 
-namespace {
-    /// WDC65816 Code Generator Pass Configuration Options.
-    class WDC65816PassConfig : public TargetPassConfig {
-    public:
-        WDC65816PassConfig(WDC65816TargetMachine *TM, PassManagerBase &PM)
-        : TargetPassConfig(TM, PM) {}
-        
-        WDC65816TargetMachine &getWDC65816TargetMachine() const {
-            return getTM<WDC65816TargetMachine>();
-        }
-        
-        virtual bool addInstSelector();
-        virtual bool addPreEmitPass();
-    };
-} // namespace
+    static Reloc::Model getEffectiveRelocModel(Optional<Reloc::Model> RM) {
+        return RM.hasValue() ? *RM : Reloc::Static;
+    }
 
-TargetPassConfig *WDC65816TargetMachine::createPassConfig(PassManagerBase &PM) {
-    return new WDC65816PassConfig(this, PM);
-}
+    WDC65816TargetMachine::WDC65816TargetMachine(const Target &T, const Triple &TT,
+        StringRef CPU, StringRef FS,
+        const TargetOptions &Options,
+        Optional<Reloc::Model> RM, CodeModel::Model CM,
+        CodeGenOpt::Level OL)
+        : LLVMTargetMachine(
+            T, WDC65816DataLayout, TT,
+            CPU, FS, Options, getEffectiveRelocModel(RM), CM, OL),
+        SubTarget(TT, CPU, FS, *this) {
+        //this->TLOF = make_unique<AVRTargetObjectFile>();
+        initAsmInfo();
+    }
 
-bool WDC65816PassConfig::addInstSelector() {
-    addPass(createWDC65816ISelDag(getWDC65816TargetMachine()));
-    return false;
-}
+    namespace {
+        /// WDC65816 Code Generator Pass Configuration Options.
+        class WDC65816PassConfig : public TargetPassConfig {
+        public:
+            WDC65816PassConfig(WDC65816TargetMachine *TM, PassManagerBase &PM)
+                : TargetPassConfig(TM, PM) {}
 
-/// addPreEmitPass - This pass may be implemented by targets that want to run
-/// passes immediately before machine code is emitted.  This should return
-/// true if -print-machineinstrs should print out the code after the passes.
-bool WDC65816PassConfig::addPreEmitPass(){
-    return false;
-}
+            WDC65816TargetMachine &getWDC65816TargetMachine() const {
+                return getTM<WDC65816TargetMachine>();
+            }
 
+            bool addInstSelector() override;
+            void addPreSched2() override;
+            void addPreRegAlloc() override;
+        };
+    } // namespace
 
-raw_ostream &llvm::wdc_dbgs(const char *file, const char *function, unsigned int linenum)
-{
-    char timebuf[64];
-    char fractime[16];
-    struct timeval now;
-    const char *filename = strrchr(file, '/');
-    raw_ostream &wdc_dbgs();
-    
-    if (filename != NULL)
-        filename++;
-    else
-        filename = file;
-    
-    gettimeofday(&now, NULL);
-    strftime(timebuf, sizeof(timebuf), "%T", localtime(&(now.tv_sec)));
-    snprintf(fractime, sizeof(fractime), ".%06u", now.tv_usec);
-    
-    return dbgs() << "| WDCLog | " << timebuf << fractime << " | " << filename << ":" << linenum << " | " << function << " | ";
-}
+    TargetPassConfig *WDC65816TargetMachine::createPassConfig(PassManagerBase &PM) {
+        return new WDC65816PassConfig(this, PM);
+    }
+
+    extern "C" void LLVMInitializeWDC65816Target() {
+        // Register the target.
+        RegisterTargetMachine<WDC65816TargetMachine> X(getTheWDC65816Target());
+
+        auto &PR = *PassRegistry::getPassRegistry();
+        initializeWDC65816ExpandPseudoPass(PR);
+        initializeWDC65816InstrumentFunctionsPass(PR);
+        initializeWDC65816RelaxMemPass(PR);
+    }
+
+    const WDC65816Subtarget *WDC65816TargetMachine::getSubtargetImpl() const {
+        return &SubTarget;
+    }
+
+    const WDC65816Subtarget *WDC65816TargetMachine::getSubtargetImpl(const Function &) const {
+        return &SubTarget;
+    }
+
+    //===----------------------------------------------------------------------===//
+    // Pass Pipeline Configuration
+    //===----------------------------------------------------------------------===//
+
+    bool WDC65816PassConfig::addInstSelector() {
+        // Install an instruction selector.
+        addPass(createWDC65816ISelDag(getWDC65816TargetMachine(), getOptLevel()));
+        // Create the frame analyzer pass used by the PEI pass.
+        addPass(createWDC65816FrameAnalyzerPass());
+
+        return false;
+    }
+
+    void WDC65816PassConfig::addPreRegAlloc() {
+        // Create the dynalloc SP save/restore pass to handle variable sized allocas.
+        addPass(createWDC65816DynAllocaSRPass());
+    }
+
+    void WDC65816PassConfig::addPreSched2() {
+        addPass(createWDC65816RelaxMemPass());
+        addPass(createWDC65816ExpandPseudoPass());
+    }
+
+} // end of namespace llvm

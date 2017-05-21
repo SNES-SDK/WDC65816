@@ -22,7 +22,7 @@ namespace llvm {
     class WDC65816MCAsmInfo : public MCAsmInfo {
         virtual void anchor();
     public:
-        explicit WDC65816MCAsmInfo(StringRef TT);
+        explicit WDC65816MCAsmInfo(const Triple &TT);
     };
     
 } // namespace llvm

@@ -14,7 +14,6 @@
 #include "WDC65816MCTargetDesc.h"
 #include "WDC65816MCAsmInfo.h"
 #include "WDC65816TargetStreamer.h"
-#include "llvm/MC/MCCodeGenInfo.h"
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
@@ -38,65 +37,62 @@ static MCInstrInfo *createWDC65816MCInstrInfo() {
     return X;
 }
 
-static MCRegisterInfo *createWDC65816MCRegisterInfo(StringRef TT) {
+static MCRegisterInfo *createWDC65816MCRegisterInfo(const Triple &TT) {
     MCRegisterInfo *X = new MCRegisterInfo();
-    InitWDC65816MCRegisterInfo(X, WDC::dpI32_0);  // The frame pointer is the 0th 32-bit direct page register
+    InitWDC65816MCRegisterInfo(X, 0);
     return X;
 }
 
-static MCSubtargetInfo *createWDC65816MCSubtargetInfo(StringRef TT, StringRef CPU,
-                                                   StringRef FS) {
-    MCSubtargetInfo *X = new MCSubtargetInfo();
-    InitWDC65816MCSubtargetInfo(X, TT, CPU, FS);
-    return X;
+static MCSubtargetInfo *createWDC65816MCSubtargetInfo(const Triple &TT,
+													  StringRef CPU, StringRef FS) {
+    return createWDC65816MCSubtargetInfoImpl(TT, CPU, FS);
 }
 
 
+#if 0
 static MCCodeGenInfo *createWDC65816MCCodeGenInfo(StringRef TT, Reloc::Model RM,
-                                               CodeModel::Model CM,
-                                               CodeGenOpt::Level OL) {
+                                                   CodeModel::Model CM,
+                                                   CodeGenOpt::Level OL) {
     MCCodeGenInfo *X = new MCCodeGenInfo();
-    
+
     // The default 32-bit code model is abs32/pic32.
     if (CM == CodeModel::Default)
         CM = CodeModel::Medium;
-    
+
     X->InitMCCodeGenInfo(RM, CM, OL);
     return X;
 }
+#endif
 
 
-static MCStreamer *
-createMCAsmStreamer(MCContext &Ctx, formatted_raw_ostream &OS,
-                    bool isVerboseAsm, bool useLoc, bool useCFI,
-                    bool useDwarfDirectory, MCInstPrinter *InstPrint,
-                    MCCodeEmitter *CE, MCAsmBackend *TAB, bool ShowInst) {
-    WDC65816TargetStreamer *S = new WDC65816TargetAsmStreamer(OS);
-    
-    return llvm::createAsmStreamer(Ctx, S, OS, isVerboseAsm, useLoc, useCFI,
-                                   useDwarfDirectory, InstPrint, CE, TAB,
-                                   ShowInst);
+static MCTargetStreamer *createTargetAsmStreamer(MCStreamer &S,
+                                                 formatted_raw_ostream &OS,
+                                                 MCInstPrinter *InstPrint,
+                                                 bool isVerboseAsm) {
+    return new WDC65816TargetAsmStreamer(S, OS);
 }
 
 
 extern "C" void LLVMInitializeWDC65816TargetMC() {
     // Register the MC asm info.
-    RegisterMCAsmInfo<WDC65816MCAsmInfo> X(TheWDC65816Target);
-    
+    RegisterMCAsmInfo<WDC65816MCAsmInfo> X(getTheWDC65816Target());
+
+#if 0
     // Register the MC codegen info.
-    TargetRegistry::RegisterMCCodeGenInfo(TheWDC65816Target,
+    TargetRegistry::RegisterMCCodeGenInfo(getTheWDC65816Target(),
                                           createWDC65816MCCodeGenInfo);
-    
-    // Register the MC instruction info.
-    TargetRegistry::RegisterMCInstrInfo(TheWDC65816Target, createWDC65816MCInstrInfo);
-    
+#endif
+
+	// Register the MC instruction info.
+    TargetRegistry::RegisterMCInstrInfo(getTheWDC65816Target(), createWDC65816MCInstrInfo);
+
     // Register the MC register info.
-    TargetRegistry::RegisterMCRegInfo(TheWDC65816Target, createWDC65816MCRegisterInfo);
-    
+    TargetRegistry::RegisterMCRegInfo(getTheWDC65816Target(), createWDC65816MCRegisterInfo);
+
     // Register the MC subtarget info.
-    TargetRegistry::RegisterMCSubtargetInfo(TheWDC65816Target,
+    TargetRegistry::RegisterMCSubtargetInfo(getTheWDC65816Target(),
                                             createWDC65816MCSubtargetInfo);
-    
-    // Register the asm streamer.
-    TargetRegistry::RegisterAsmStreamer(TheWDC65816Target, createMCAsmStreamer);
+
+    // Register the asm target streamer.
+    TargetRegistry::RegisterAsmTargetStreamer(getTheWDC65816Target(), createTargetAsmStreamer);
 }

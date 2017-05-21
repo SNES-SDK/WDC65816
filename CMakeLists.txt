@@ -18,7 +18,6 @@ add_llvm_target(WDC65816CodeGen
   WDC65816RegisterInfo.cpp
   WDC65816Subtarget.cpp
   WDC65816TargetMachine.cpp
-  WDC65816SelectionDAGInfo.cpp
 )
 
 add_dependencies(LLVMWDC65816CodeGen WDC65816CommonTableGen intrinsics_gen)

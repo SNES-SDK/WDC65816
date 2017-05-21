@@ -9,17 +9,14 @@
 #ifndef WDC65816TargetStreamer_h
 #define WDC65816TargetStreamer_h
 
-
 #include "llvm/MC/MCStreamer.h"
 
-
 namespace llvm {
-    
-    
     class WDC65816TargetStreamer : public MCTargetStreamer {
         virtual void anchor();
         
     public:
+		explicit WDC65816TargetStreamer(MCStreamer &S) : MCTargetStreamer(S) {}
         virtual void EmitAutoimportDirective(void) = 0;
         virtual void EmitCodeDirective(void) = 0;
         virtual void EmitP816Directive(void) = 0;
@@ -34,7 +31,8 @@ namespace llvm {
         StringRef &trimFilename(StringRef &filename);
         
     public:
-        WDC65816TargetAsmStreamer(formatted_raw_ostream &OS) : OS(OS) {}
+        WDC65816TargetAsmStreamer(MCStreamer &S, formatted_raw_ostream &OS)
+			: WDC65816TargetStreamer(S), OS(OS) {}
         virtual ~WDC65816TargetAsmStreamer();
         
         virtual void EmitAutoimportDirective(void);
