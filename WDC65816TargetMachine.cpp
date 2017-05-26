@@ -19,8 +19,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Support/TargetRegistry.h"
 
-//#include "AVRTargetObjectFile.h"
-//#include "AVR.h"
+//#include "WDC65816TargetObjectFile.h"
 #include "MCTargetDesc/WDC65816MCTargetDesc.h"
 
 namespace llvm {

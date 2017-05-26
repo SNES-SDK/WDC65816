@@ -16,7 +16,7 @@ namespace llvm {
         virtual void anchor();
         
     public:
-		explicit WDC65816TargetStreamer(MCStreamer &S) : MCTargetStreamer(S) {}
+        explicit WDC65816TargetStreamer(MCStreamer &S) : MCTargetStreamer(S) {}
         virtual void EmitAutoimportDirective(void) = 0;
         virtual void EmitCodeDirective(void) = 0;
         virtual void EmitP816Directive(void) = 0;
@@ -32,7 +32,7 @@ namespace llvm {
         
     public:
         WDC65816TargetAsmStreamer(MCStreamer &S, formatted_raw_ostream &OS)
-			: WDC65816TargetStreamer(S), OS(OS) {}
+            : WDC65816TargetStreamer(S), OS(OS) {}
         virtual ~WDC65816TargetAsmStreamer();
         
         virtual void EmitAutoimportDirective(void);

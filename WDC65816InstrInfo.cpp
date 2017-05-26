@@ -30,12 +30,10 @@
 using namespace llvm;
 
 
-// Pin the vtable to this file.
-void WDC65816InstrInfo::anchor() {}
-
-WDC65816InstrInfo::WDC65816InstrInfo(WDC65816Subtarget &ST)
-: WDC65816GenInstrInfo(WDC::ADJCALLSTACKDOWN, WDC::ADJCALLSTACKUP),
-RI(ST), Subtarget(ST) {
+WDC65816InstrInfo::WDC65816InstrInfo()
+    : WDC65816GenInstrInfo(WDC::ADJCALLSTACKDOWN, WDC::ADJCALLSTACKUP),
+      RI()
+{
 }
 
 

@@ -54,7 +54,7 @@ namespace llvm {
     
     class WDC65816TargetLowering : public TargetLowering {
     public:
-        WDC65816TargetLowering(TargetMachine &TM);
+        explicit WDC65816TargetLowering(WDC65816TargetMachine &TM);
         
         virtual SDValue
         LowerFormalArguments(SDValue Chain,

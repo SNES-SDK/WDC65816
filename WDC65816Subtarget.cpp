@@ -28,11 +28,13 @@
 
 namespace llvm {
 
-    WDC65816Subtarget::WDC65816Subtarget(const Triple &TT, const std::string &CPU,
-        const std::string &FS, WDC65816TargetMachine &TM)
+    WDC65816Subtarget::WDC65816Subtarget(const Triple &TT,
+                                         const std::string &CPU,
+                                         const std::string &FS,
+                                         WDC65816TargetMachine &TM)
         : WDC65816GenSubtargetInfo(TT, CPU, FS), InstrInfo(), FrameLowering(),
-        TLInfo(TM), TSInfo() {
-
+          TLInfo(TM), TSInfo()
+    {
         // Parse features string.
         ParseSubtargetFeatures(CPU, FS);
     }

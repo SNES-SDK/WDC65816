@@ -25,10 +25,9 @@ namespace llvm {
     class TargetInstrInfo;
     class Type;
     
-    struct WDC65816RegisterInfo : public WDC65816GenRegisterInfo {
-        WDC65816Subtarget &Subtarget;
-        
-        WDC65816RegisterInfo(WDC65816Subtarget &st);
+    class WDC65816RegisterInfo : public WDC65816GenRegisterInfo {
+    public:
+        WDC65816RegisterInfo();
 
         /// Code Generation virtual methods...
         const uint16_t *getCalleeSavedRegs(const MachineFunction *MF = 0) const;

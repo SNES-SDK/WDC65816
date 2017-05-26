@@ -44,7 +44,7 @@ static MCRegisterInfo *createWDC65816MCRegisterInfo(const Triple &TT) {
 }
 
 static MCSubtargetInfo *createWDC65816MCSubtargetInfo(const Triple &TT,
-													  StringRef CPU, StringRef FS) {
+                                                      StringRef CPU, StringRef FS) {
     return createWDC65816MCSubtargetInfoImpl(TT, CPU, FS);
 }
 
@@ -83,7 +83,7 @@ extern "C" void LLVMInitializeWDC65816TargetMC() {
                                           createWDC65816MCCodeGenInfo);
 #endif
 
-	// Register the MC instruction info.
+    // Register the MC instruction info.
     TargetRegistry::RegisterMCInstrInfo(getTheWDC65816Target(), createWDC65816MCInstrInfo);
 
     // Register the MC register info.

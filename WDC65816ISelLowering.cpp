@@ -16,7 +16,7 @@
 #include "WDC65816MachineFunctionInfo.h"
 #include "WDC65816RegisterInfo.h"
 #include "WDC65816TargetMachine.h"
-#include "WDC65816TargetObjectFile.h"
+//#include "WDC65816TargetObjectFile.h"
 #include "MCTargetDesc/WDC65816BaseInfo.h"
 #include "llvm/CodeGen/CallingConvLower.h"
 #include "llvm/CodeGen/MachineFrameInfo.h"
@@ -51,7 +51,7 @@ SDValue WDC65816TargetLowering::LowerFormalArguments(SDValue Chain,
     // Assign locations to all of the incoming arguments.
     SmallVector<CCValAssign, 16> ArgLocs;
     CCState CCInfo(CallConv, isVarArg, DAG.getMachineFunction(),
-                   getTargetMachine(), ArgLocs, *DAG.getContext());
+                   ArgLocs, *DAG.getContext());
     CCInfo.AnalyzeFormalArguments(Ins, CC_WDC);
     
     for (unsigned i = 0, e = ArgLocs.size(); i != e; ++i) {
@@ -95,8 +95,7 @@ SDValue WDC65816TargetLowering::LowerFormalArguments(SDValue Chain,
 }
 
 
-SDValue
-WDC65816TargetLowering::LowerReturn(SDValue Chain,
+SDValue WDC65816TargetLowering::LowerReturn(SDValue Chain,
                                     CallingConv::ID CallConv, bool IsVarArg,
                                     const SmallVectorImpl<ISD::OutputArg> &Outs,
                                     const SmallVectorImpl<SDValue> &OutVals,
@@ -108,7 +107,7 @@ WDC65816TargetLowering::LowerReturn(SDValue Chain,
     
     // CCState - Info about the registers and stack slot.
     CCState CCInfo(CallConv, IsVarArg, DAG.getMachineFunction(),
-                   DAG.getTarget(), RVLocs, *DAG.getContext());
+                   RVLocs, *DAG.getContext());
     
     // Analyze return values.
     CCInfo.AnalyzeReturn(Outs, RetCC_WDC);
@@ -139,28 +138,29 @@ WDC65816TargetLowering::LowerReturn(SDValue Chain,
     if (Flag.getNode())
         RetOps.push_back(Flag);
     
-    return DAG.getNode(WDCISD::RET_FLAG, DL, MVT::Other,
-                       &RetOps[0], RetOps.size());
+    return DAG.getNode(WDCISD::RET_FLAG, DL, MVT::Other, RetOps);
 }
 
 
 SDValue WDC65816TargetLowering::LowerGlobalAddress(SDValue Op,
                                                    SelectionDAG &DAG) const
 {
+    auto DL = DAG.getDataLayout();
+
     const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
     int64_t Offset = cast<GlobalAddressSDNode>(Op)->getOffset();
     
     // Create the TargetGlobalAddress node, folding in the constant offset.
     SDValue Result = DAG.getTargetGlobalAddress(GV, SDLoc(Op),
-                                                getPointerTy(), Offset);
+                                                getPointerTy(DL), Offset);
     return DAG.getNode(WDCISD::Wrapper, SDLoc(Op),
-                       getPointerTy(), Result);
+                       getPointerTy(DL), Result);
 }
 
 
-WDC65816TargetLowering::WDC65816TargetLowering(TargetMachine &TM)
-: TargetLowering(TM, new WDC65816TargetObjectFile()) {
-    
+WDC65816TargetLowering::WDC65816TargetLowering(WDC65816TargetMachine &TM)
+    : TargetLowering(TM)
+{
     addRegisterClass(MVT::i16, &WDC::AccRegsRegClass);
     addRegisterClass(MVT::i16, &WDC::IndexXRegsRegClass);
     addRegisterClass(MVT::i16, &WDC::IndexYRegsRegClass);
@@ -170,10 +170,10 @@ WDC65816TargetLowering::WDC65816TargetLowering(TargetMachine &TM)
     addRegisterClass(MVT::f32, &WDC::Float32RegsRegClass);
     addRegisterClass(MVT::f64, &WDC::Float64RegsRegClass);
     
-    computeRegisterProperties();
+    computeRegisterProperties(TM.getSubtargetImpl()->getRegisterInfo());
     
     // Division is expensive
-    setIntDivIsCheap(false);
+    //setIntDivIsCheap(false);
     
     setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
 }
@@ -188,8 +188,7 @@ const char *WDC65816TargetLowering::getTargetNodeName(unsigned Opcode) const {
 
 
 
-SDValue WDC65816TargetLowering::
-LowerOperation(SDValue Op, SelectionDAG &DAG) const {
+SDValue WDC65816TargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
     switch (Op.getOpcode()) {
         default: llvm_unreachable("Should not custom lower this!");
         case ISD::GlobalAddress:      return LowerGlobalAddress(Op, DAG);
@@ -197,8 +196,7 @@ LowerOperation(SDValue Op, SelectionDAG &DAG) const {
 }
 
 
-void
-WDC65816TargetLowering::LowerOperationWrapper(SDNode *N,
+void WDC65816TargetLowering::LowerOperationWrapper(SDNode *N,
                                           SmallVectorImpl<SDValue> &Results,
                                           SelectionDAG &DAG) const {
     SDValue Res = LowerOperation(SDValue(N, 0), DAG);
@@ -207,36 +205,8 @@ WDC65816TargetLowering::LowerOperationWrapper(SDNode *N,
         Results.push_back(Res.getValue(I));
 }
 
-void
-WDC65816TargetLowering::ReplaceNodeResults(SDNode *N,
+void WDC65816TargetLowering::ReplaceNodeResults(SDNode *N,
                                        SmallVectorImpl<SDValue> &Results,
                                        SelectionDAG &DAG) const {
     return LowerOperationWrapper(N, Results, DAG);
-}
-
-
-// Pin WDC65816Section's and WDC65816TargetObjectFile's vtables to this file.
-void WDC65816Section::anchor() {}
-
-WDC65816TargetObjectFile::~WDC65816TargetObjectFile() {
-    delete TextSection;
-    delete DataSection;
-    delete BSSSection;
-    delete ReadOnlySection;
-    
-    delete StaticCtorSection;
-    delete StaticDtorSection;
-    delete LSDASection;
-    delete EHFrameSection;
-    delete DwarfAbbrevSection;
-    delete DwarfInfoSection;
-    delete DwarfLineSection;
-    delete DwarfFrameSection;
-    delete DwarfPubTypesSection;
-    delete DwarfDebugInlineSection;
-    delete DwarfStrSection;
-    delete DwarfLocSection;
-    delete DwarfARangesSection;
-    delete DwarfRangesSection;
-    delete DwarfMacroInfoSection;
 }

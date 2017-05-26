@@ -28,7 +28,7 @@
 #include "llvm/MC/MCSymbol.h"
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/Target/Mangler.h"
+//#include "llvm/Target/Mangler.h"
 
 using namespace llvm;
 
@@ -37,10 +37,10 @@ namespace {
         WDC65816TargetStreamer &getTargetStreamer();
         
     public:
-        explicit WDC65816AsmPrinter(TargetMachine &TM, MCStreamer &Streamer)
-        : AsmPrinter(TM, Streamer) {}
+        WDC65816AsmPrinter(TargetMachine &TM, std::unique_ptr<MCStreamer> Streamer)
+            : AsmPrinter(TM, std::move(Streamer)) {}
         
-        virtual const char *getPassName() const {
+        StringRef getPassName() const override {
             return "WDC65816 Assembly Printer";
         }
         
@@ -73,7 +73,8 @@ namespace {
 
 
 
-WDC65816TargetStreamer &WDC65816AsmPrinter::getTargetStreamer() {
+WDC65816TargetStreamer &WDC65816AsmPrinter::getTargetStreamer()
+{
     return static_cast<WDC65816TargetStreamer &>(OutStreamer.getTargetStreamer());
 }
 
@@ -91,7 +92,6 @@ void WDC65816AsmPrinter::EmitStartOfAsmFile(Module &module)
 void WDC65816AsmPrinter::EmitEndOfAsmFile(Module &module)
 {
     WDC65816TargetStreamer &streamer = getTargetStreamer();
-    
 }
 
 void WDC65816AsmPrinter::printOperand(const MachineInstr *MI, int opNum,
@@ -140,6 +140,6 @@ void WDC65816AsmPrinter::EmitFunctionEntryLabel() {
 
 // Force static initialization.
 extern "C" void LLVMInitializeWDC65816AsmPrinter() {
-    RegisterAsmPrinter<WDC65816AsmPrinter> X(TheWDC65816Target);
+    RegisterAsmPrinter<WDC65816AsmPrinter> X(getTheWDC65816Target());
     WDC_LOG("Assembly printer registered");
 }

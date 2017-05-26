@@ -24,30 +24,28 @@ namespace llvm {
     
     class WDC65816InstrInfo : public WDC65816GenInstrInfo {
         const WDC65816RegisterInfo RI;
-        const WDC65816Subtarget& Subtarget;
-        virtual void anchor();
     public:
-        explicit WDC65816InstrInfo(WDC65816Subtarget &ST);
+        WDC65816InstrInfo();
         
         /// getRegisterInfo - TargetInstrInfo is a superset of MRegister info.  As
         /// such, whenever a client has an instance of instruction info, it should
         /// always be able to get register info as well (through this method).
         ///
-        virtual const WDC65816RegisterInfo &getRegisterInfo() const { return RI; }
+        const WDC65816RegisterInfo &getRegisterInfo() const { return RI; }
         
         unsigned getGlobalBaseReg(MachineFunction *MF) const;
         
-        virtual void storeRegToStackSlot(MachineBasicBlock &MBB,
-                                         MachineBasicBlock::iterator MI,
-                                         unsigned SrcReg, bool isKill,
-                                         int FrameIndex,
-                                         const TargetRegisterClass *RC,
-                                         const TargetRegisterInfo *TRI) const;
-        virtual void loadRegFromStackSlot(MachineBasicBlock &MBB,
-                                          MachineBasicBlock::iterator MI,
-                                          unsigned DestReg, int FrameIdx,
-                                          const TargetRegisterClass *RC,
-                                          const TargetRegisterInfo *TRI) const;
+        void storeRegToStackSlot(MachineBasicBlock &MBB,
+                                 MachineBasicBlock::iterator MI,
+                                 unsigned SrcReg, bool isKill,
+                                 int FrameIndex,
+                                 const TargetRegisterClass *RC,
+                                 const TargetRegisterInfo *TRI) const;
+        void loadRegFromStackSlot(MachineBasicBlock &MBB,
+                                  MachineBasicBlock::iterator MI,
+                                  unsigned DestReg, int FrameIdx,
+                                  const TargetRegisterClass *RC,
+                                  const TargetRegisterInfo *TRI) const;
         
     };
     

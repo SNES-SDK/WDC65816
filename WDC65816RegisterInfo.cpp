@@ -30,8 +30,9 @@
 
 using namespace llvm;
 
-WDC65816RegisterInfo::WDC65816RegisterInfo(WDC65816Subtarget &st)
-: WDC65816GenRegisterInfo(WDC::P), Subtarget(st) {
+WDC65816RegisterInfo::WDC65816RegisterInfo()
+    : WDC65816GenRegisterInfo(WDC::P)
+{
 }
 
 const uint16_t* WDC65816RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF)
