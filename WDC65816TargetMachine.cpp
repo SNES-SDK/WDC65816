@@ -68,10 +68,12 @@ namespace llvm {
         // Register the target.
         RegisterTargetMachine<WDC65816TargetMachine> X(getTheWDC65816Target());
 
+#if 0
         auto &PR = *PassRegistry::getPassRegistry();
         initializeWDC65816ExpandPseudoPass(PR);
         initializeWDC65816InstrumentFunctionsPass(PR);
         initializeWDC65816RelaxMemPass(PR);
+#endif
     }
 
     const WDC65816Subtarget *WDC65816TargetMachine::getSubtargetImpl() const {
@@ -88,21 +90,27 @@ namespace llvm {
 
     bool WDC65816PassConfig::addInstSelector() {
         // Install an instruction selector.
-        addPass(createWDC65816ISelDag(getWDC65816TargetMachine(), getOptLevel()));
+        addPass(createWDC65816ISelDag(getWDC65816TargetMachine()));
+#if 0
         // Create the frame analyzer pass used by the PEI pass.
         addPass(createWDC65816FrameAnalyzerPass());
+#endif
 
         return false;
     }
 
     void WDC65816PassConfig::addPreRegAlloc() {
+#if 0
         // Create the dynalloc SP save/restore pass to handle variable sized allocas.
         addPass(createWDC65816DynAllocaSRPass());
+#endif
     }
 
     void WDC65816PassConfig::addPreSched2() {
+#if 0
         addPass(createWDC65816RelaxMemPass());
         addPass(createWDC65816ExpandPseudoPass());
+#endif
     }
 
 } // end of namespace llvm

@@ -8,12 +8,13 @@
 //===----------------------------------------------------------------------===//
 //
 // This file contains a printer that converts from our internal representation
-// of machine-dependent LLVM code to GAS-format SPARC assembly language.
+// of machine-dependent LLVM code to ca65-format 65816 assembly language.
 //
 //===----------------------------------------------------------------------===//
 
 #define DEBUG_TYPE "asm-printer"
 #include "WDC65816.h"
+#include "InstPrinter/WDC65816InstPrinter.h"
 #include "WDC65816InstrInfo.h"
 #include "WDC65816TargetMachine.h"
 #include "MCTargetDesc/WDC65816BaseInfo.h"
@@ -43,39 +44,22 @@ namespace {
         StringRef getPassName() const override {
             return "WDC65816 Assembly Printer";
         }
-        
-        void printInstruction(const MachineInstr *MI, raw_ostream &OS);// autogen'd.
+
         void printOperand(const MachineInstr *MI, int opNum, raw_ostream &OS);
         void printMemOperand(const MachineInstr *MI, int opNum, raw_ostream &OS,
                              const char *Modifier = 0);
+
+        void EmitStartOfAsmFile(Module &module) override;
+        void EmitFunctionEntryLabel() override;
         
-        bool printGetPCX(const MachineInstr *MI, unsigned OpNo, raw_ostream &OS);
-        
-        static const char *getRegisterName(unsigned RegNo);
-        
-        virtual void EmitStartOfAsmFile(Module &module);
-        virtual void EmitEndOfAsmFile(Module &module);
-        virtual void EmitFunctionEntryLabel();
-        
-        virtual void EmitInstruction(const MachineInstr *MI) {
-            SmallString<128> Str;
-            raw_svector_ostream OS(Str);
-            printInstruction(MI, OS);
-            
-            WDC65816TargetStreamer &streamer = getTargetStreamer();
-            streamer.EmitInstruction(OS.str());
-        }
-        
+        void EmitInstruction(const MachineInstr *MI) override;
     };
 } // end of anonymous namespace
-
-#include "WDC65816GenAsmWriter.inc"
-
 
 
 WDC65816TargetStreamer &WDC65816AsmPrinter::getTargetStreamer()
 {
-    return static_cast<WDC65816TargetStreamer &>(OutStreamer.getTargetStreamer());
+    return static_cast<WDC65816TargetStreamer &>(*OutStreamer->getTargetStreamer());
 }
 
 
@@ -89,18 +73,14 @@ void WDC65816AsmPrinter::EmitStartOfAsmFile(Module &module)
 }
 
 
-void WDC65816AsmPrinter::EmitEndOfAsmFile(Module &module)
-{
-    WDC65816TargetStreamer &streamer = getTargetStreamer();
-}
-
 void WDC65816AsmPrinter::printOperand(const MachineInstr *MI, int opNum,
-                                      raw_ostream &O) {
+                                      raw_ostream &O)
+{
     const MachineOperand &MO = MI->getOperand(opNum);
     switch (MO.getType()) {
         default: llvm_unreachable("Not implemented yet!");
         case MachineOperand::MO_Register:
-            O << StringRef(getRegisterName(MO.getReg()));
+            O << StringRef(WDC65816InstPrinter::getRegisterName(MO.getReg())).lower();
             return;
         case MachineOperand::MO_Immediate:
             O << "#" << MO.getImm();
@@ -113,7 +93,7 @@ void WDC65816AsmPrinter::printOperand(const MachineInstr *MI, int opNum,
             return;
         }
         case MachineOperand::MO_ExternalSymbol: {
-            O << MAI->getGlobalPrefix() << MO.getSymbolName();
+            O << MO.getSymbolName();
             return;
         }
     }
@@ -121,25 +101,29 @@ void WDC65816AsmPrinter::printOperand(const MachineInstr *MI, int opNum,
 
 
 void WDC65816AsmPrinter::printMemOperand(const MachineInstr *MI, int opNum,
-                                         raw_ostream &O, const char *Modifier) {
-    WDC_LOG("WDC_TODO - Unimplemented method called");
+                                         raw_ostream &O, const char *Modifier)
+{
+    llvm_unreachable("FIXME: Implement WDC65816AsmPrinter::printMemOperand");
 }
 
 
-bool WDC65816AsmPrinter::printGetPCX(const MachineInstr *MI, unsigned opNum,
-                                     raw_ostream &O) {
-    WDC_LOG("WDC_TODO - Unimplemented method called");
-    return true;
-}
-
-
-void WDC65816AsmPrinter::EmitFunctionEntryLabel() {
+void WDC65816AsmPrinter::EmitFunctionEntryLabel()
+{
     WDC65816TargetStreamer &streamer = getTargetStreamer();
     streamer.EmitFunctionEntryLabel(CurrentFnSym->getName());
 }
 
+
+void WDC65816AsmPrinter::EmitInstruction(const MachineInstr *MI)
+{
+    MCInst TmpInst;
+    LowerWDC65816MachineInstrToMCInst(MI, TmpInst, *this);
+    EmitToStreamer(*OutStreamer, TmpInst);
+}
+
+
 // Force static initialization.
-extern "C" void LLVMInitializeWDC65816AsmPrinter() {
+extern "C" void LLVMInitializeWDC65816AsmPrinter()
+{
     RegisterAsmPrinter<WDC65816AsmPrinter> X(getTheWDC65816Target());
-    WDC_LOG("Assembly printer registered");
 }

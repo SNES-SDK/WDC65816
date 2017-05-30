@@ -90,14 +90,14 @@ def callseq_start : SDNode<"ISD::CALLSEQ_START", SDT_SPCallSeqStart,
 def callseq_end   : SDNode<"ISD::CALLSEQ_END",   SDT_SPCallSeqEnd,
         [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue]>;
 
-def getPCX        : Operand<i32> {
-    let PrintMethod = "printGetPCX";
-}
-
+//def getPCX        : Operand<i32> {
+//    let PrintMethod = "printGetPCX";
+//}
+//
 // GETPCX for PIC
-let Defs = [PC] in {
-    def GETPCX : Pseudo<(outs getPCX:$getpcseq), (ins), "$getpcseq", [] >;
-}
+//let Defs = [PC] in {
+//    def GETPCX : Pseudo<(outs getPCX:$getpcseq), (ins), "$getpcseq", [] >;
+//}
 
 let Defs = [S], Uses = [S] in {
     def ADJCALLSTACKDOWN : Pseudo<(outs), (ins i32imm:$amt),

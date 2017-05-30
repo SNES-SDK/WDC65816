@@ -15,6 +15,7 @@ add_llvm_target(WDC65816CodeGen
   WDC65816ISelLowering.cpp
   WDC65816FrameLowering.cpp
   WDC65816MachineFunctionInfo.cpp
+  WDC65816MCInstLower.cpp
   WDC65816RegisterInfo.cpp
   WDC65816Subtarget.cpp
   WDC65816TargetMachine.cpp
@@ -22,5 +23,6 @@ add_llvm_target(WDC65816CodeGen
 
 add_dependencies(LLVMWDC65816CodeGen WDC65816CommonTableGen intrinsics_gen)
 
+add_subdirectory(InstPrinter)
 add_subdirectory(TargetInfo)
 add_subdirectory(MCTargetDesc)
