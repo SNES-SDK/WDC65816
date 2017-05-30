@@ -21,7 +21,8 @@
 #include "llvm/Target/TargetMachine.h"
 
 
-#define WDC_LOG(X) DEBUG_WITH_TYPE("WDC", wdc_dbgs(__FILE__, __func__, __LINE__) << X << "\n");
+//#define WDC_LOG(X) DEBUG_WITH_TYPE("WDC", wdc_dbgs(__FILE__, __func__, __LINE__) << X << "\n");
+#define WDC_LOG(X)
 
 namespace llvm {
     class FunctionPass;
