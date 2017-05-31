@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "WDC65816MCTargetDesc.h"
+#include "InstPrinter/WDC65816InstPrinter.h"
 #include "WDC65816MCAsmInfo.h"
 #include "WDC65816TargetStreamer.h"
 #include "llvm/MC/MCInstrInfo.h"
@@ -31,20 +32,23 @@
 
 using namespace llvm;
 
-static MCInstrInfo *createWDC65816MCInstrInfo() {
+static MCInstrInfo *createWDC65816MCInstrInfo()
+{
     MCInstrInfo *X = new MCInstrInfo();
     InitWDC65816MCInstrInfo(X);
     return X;
 }
 
-static MCRegisterInfo *createWDC65816MCRegisterInfo(const Triple &TT) {
+static MCRegisterInfo *createWDC65816MCRegisterInfo(const Triple &TT)
+{
     MCRegisterInfo *X = new MCRegisterInfo();
     InitWDC65816MCRegisterInfo(X, 0);
     return X;
 }
 
 static MCSubtargetInfo *createWDC65816MCSubtargetInfo(const Triple &TT,
-                                                      StringRef CPU, StringRef FS) {
+                                                      StringRef CPU, StringRef FS)
+{
     return createWDC65816MCSubtargetInfoImpl(TT, CPU, FS);
 }
 
@@ -68,31 +72,45 @@ static MCCodeGenInfo *createWDC65816MCCodeGenInfo(StringRef TT, Reloc::Model RM,
 static MCTargetStreamer *createTargetAsmStreamer(MCStreamer &S,
                                                  formatted_raw_ostream &OS,
                                                  MCInstPrinter *InstPrint,
-                                                 bool isVerboseAsm) {
+                                                 bool isVerboseAsm)
+{
     return new WDC65816TargetAsmStreamer(S, OS);
 }
 
 
+static MCInstPrinter *createWDC65816MCInstPrinter(const Triple &T,
+                                                  unsigned SyntaxVariant,
+                                                  const MCAsmInfo &MAI,
+                                                  const MCInstrInfo &MII,
+                                                  const MCRegisterInfo &MRI)
+{
+    return new WDC65816InstPrinter(MAI, MII, MRI);
+}
+
+
 extern "C" void LLVMInitializeWDC65816TargetMC() {
+    llvm::Target &T = getTheWDC65816Target();
+
     // Register the MC asm info.
-    RegisterMCAsmInfo<WDC65816MCAsmInfo> X(getTheWDC65816Target());
+    RegisterMCAsmInfo<WDC65816MCAsmInfo> X(T);
 
 #if 0
     // Register the MC codegen info.
-    TargetRegistry::RegisterMCCodeGenInfo(getTheWDC65816Target(),
-                                          createWDC65816MCCodeGenInfo);
+    TargetRegistry::RegisterMCCodeGenInfo(T, createWDC65816MCCodeGenInfo);
 #endif
 
     // Register the MC instruction info.
-    TargetRegistry::RegisterMCInstrInfo(getTheWDC65816Target(), createWDC65816MCInstrInfo);
+    TargetRegistry::RegisterMCInstrInfo(T, createWDC65816MCInstrInfo);
 
     // Register the MC register info.
-    TargetRegistry::RegisterMCRegInfo(getTheWDC65816Target(), createWDC65816MCRegisterInfo);
+    TargetRegistry::RegisterMCRegInfo(T, createWDC65816MCRegisterInfo);
 
     // Register the MC subtarget info.
-    TargetRegistry::RegisterMCSubtargetInfo(getTheWDC65816Target(),
-                                            createWDC65816MCSubtargetInfo);
+    TargetRegistry::RegisterMCSubtargetInfo(T, createWDC65816MCSubtargetInfo);
 
     // Register the asm target streamer.
-    TargetRegistry::RegisterAsmTargetStreamer(getTheWDC65816Target(), createTargetAsmStreamer);
+    TargetRegistry::RegisterAsmTargetStreamer(T, createTargetAsmStreamer);
+
+    // Register the MCInstPrinter
+    TargetRegistry::RegisterMCInstPrinter(T, createWDC65816MCInstPrinter);
 }
